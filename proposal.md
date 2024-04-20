@@ -34,7 +34,14 @@ Other applications can easily be thought of in the context of code injection [@p
 
 # Proposal
 
-We put ourselves in the context of [@p2996r2] for the proposal to be more illustrative.
+We put ourselves in the context of [@p2996r2] for the current proposal to be more illustrative in terms of what is being proposed.
+
+## Reflection operator
+If our understanding is correct, the proposition for `^` grammar does not cover attributes , as in `^[[deprecated]]` is not correct. We think this will limit the potential use of attributes introspection. The current proposal advocates for 
+```
+^ attribute
+```
+to be well formed.
 
 ## std::meta::info
 We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means `std::meta::info` should be augmented to represent an attribute in addition to what it can represent.
@@ -56,8 +63,13 @@ We do not think it is the best option to introduce a query per attribute such as
   consteval bool is_nodiscard(info type);
   // ...
 ```
-We would rather see a query able to flag whether a particular attribute belongs to what `attributes_of` yields.
+We think query to filter in particular attribute scales better
+```cpp
+  auto fooAttributes = attributes_of([:foo(int):]);
+  if constexpr (is_attributed(fooAttributres, ^[[nodiscard]])) {
 
+  }
+```
 # Discussion
 
 Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox.
