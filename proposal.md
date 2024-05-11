@@ -33,13 +33,25 @@ int main() {
 ```
 Ideally we would want a mechanism to recover the `[[nodiscard]]` attribute that originally appertained to `foo` declaration.
 Other examples of wrapping around callables can be found, whether by closure or explicity registering callbacks for dispatch, etc.
-The current example deals with code as it is in a c++23 world, but other applications can easily be thought of in the context of code injection [@p2237r0] where one may want to skip over `[[deprecated]]` members for example.
+The current example deals with code as it is in a c++23 world, but other applications can easily be thought of in the context of code injection [@P2237R0] where one may want to skip over `[[deprecated]]` members for example.
+
+# Optionality rule
+Currently the standard notes in ([dcl.attr.grammar]) that (broadly speaking) attributes are ignorable. Let us note
+
+- [@CWG2538] discusses changing this to restrict ignorability to `non standard`, and make program ill-formed when attribute semantic is violated
+- [@P2552R3] discusses at length how underspecified this wording is, especially on what 'ignorability' really mean
+This proposal agrees with the change proposed in [@CWG2538]. We also feel that whether an implementation decide to semantically ignore a standard  attribute should not matter.\
+
+What matters more is self-consistency, when introspecting an entity:
+
+- We should be able to discover appertaining attributes (syntactically mandatory)
+- Declaring an entity with those discovered attributes yield the same result as what the implementation offer to natively (semantically optional)
 
 # Proposal
-We put ourselves in the context of [@p2996r2] for the current proposal to be more illustrative in terms of what is being proposed.
+We put ourselves in the context of [@P2996R2] for the current proposal to be more illustrative in terms of what is being proposed.
 
 ## Scope
-The proposal limits itself to standard attributes ([dcl.attr]) with the purpose to reduce implementation complexity. We feel that since it is up to implementation to define how they handle non standard attributes, it would lead to unknown unknowns that we don't aim to tackle here.\
+Attributes are split into standard and non standard. This proposal wishes to limit itself to standard attributes ([dcl.attr]). We feel that since it is up to implementation to define how they handle non standard attributes, it would lead to obscure situations that we don't claim to tackle here.\
 A fairly (admittedly ridiculous) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
 
 ## Reflection operator
@@ -62,7 +74,7 @@ be supported. This implicitly means that `std::meta::info` definition must be ex
 We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means value of type `std::meta::info` should be able to represent an attribute in addition to the current supported set.
 
 ## Metafunctions
-We propose to add a metafunction to what is discussed already in [@p2996r2]
+We propose to add a metafunction to what is discussed already in [@P2996R2]
 
 ```cpp
   template<typename E>
@@ -76,7 +88,7 @@ We do not think it is necessary to introduce query or queries at this point. Esp
 # Discussion
 
 Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox. Note also that as we advocate here for `attribute [: r :]` to be supported, we recover the ease of use that we first envisioned `declattr` to have.
-
+<!-- 
 ---
 references:
   - id: p2996r2
@@ -105,4 +117,18 @@ references:
       - family: Sutton
         given: Andrew
     URL: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2237r0.pdf
----
+    -id: p2552r3
+    citation-label: Optionality rule
+    title: "On the ignorability of standard attributes"
+    author:
+      - family: Doumler
+        given: Timur
+    URL: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2552r3.pdf
+    -id: CWG2358
+    citation-label: CWG2358
+    title: "Can standard attributes be syntactically ignored?"
+    author:
+      - family: Maurer
+        given: Jens
+    URL: https://cplusplus.github.io/CWG/issues/2538.html
+--- -->
