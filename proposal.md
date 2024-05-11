@@ -39,7 +39,7 @@ The current example deals with code as it is in a c++23 world, but other applica
 We put ourselves in the context of [@p2996r2] for the current proposal to be more illustrative in terms of what is being proposed.
 
 ## Scope
-The proposal limits itself to standard attributes ([dcl.attr]) with the purpose to reduce implementation complexity. We feel that since it is up to implementation to define how they handle non standard attributes, up to ignoring those, it would lead to unknown unknowns that we don't aim to tackle here.\
+The proposal limits itself to standard attributes ([dcl.attr]) with the purpose to reduce implementation complexity. We feel that since it is up to implementation to define how they handle non standard attributes, it would lead to unknown unknowns that we don't aim to tackle here.\
 A fairly (admittedly ridiculous) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
 
 ## Reflection operator
