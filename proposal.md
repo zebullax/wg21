@@ -13,8 +13,8 @@ The current draft aims at getting the conversation and work started on supportin
 # Motivation
 
 Attributes are used to great extent and there likely will be attributes added as the language evolve.
-What is missing now is a way for generic code to look into the attributes related to an entity.
-A motivating example is the following
+What is missing now is a way for generic code to look into the attributes appertaining to an entity.
+A motivating toy example is the following
 
 ```cpp
 [[nodiscard]] bool foo(int i) { return i % 2 ; }
@@ -31,13 +31,16 @@ int main() {
     logInvoke(foo, 0); // No warning on discarded return
 }
 ```
-
+Ideally we would want a mechanism to recover the `[[nodiscard]]` attribute that originally appertained to `foo` declaration.
 Other examples of wrapping around callables can be found, whether by closure or explicity registering callbacks for dispatch, etc.
 The current example deals with code as it is in a c++23 world, but other applications can easily be thought of in the context of code injection [@p2237r0] where one may want to skip over `[[deprecated]]` members for example.
 
 # Proposal
-
 We put ourselves in the context of [@p2996r2] for the current proposal to be more illustrative in terms of what is being proposed.
+
+## Scope
+The proposal limits itself to standard attributes ([dcl.attr]) with the purpose to reduce implementation complexity. We feel that since it is up to implementation to define how they handle non standard attributes, up to ignoring those, it would lead to unknown unknowns that we don't aim to tackle here.\
+A fairly (admittedly ridiculous) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
 
 ## Reflection operator
 If our understanding is correct, the proposition for `^` grammar does not cover attributes , as in `^[[deprecated]]` is meaningless. We think this will limit the potential use of attributes introspection. The current proposal advocates for 
@@ -51,7 +54,7 @@ We propose that the form
 ```cpp
 attribute [: r :]
 ```
-be supported. This implicitly means that `std::meta::info` must be expanded, this will be discussed thereafter. 
+be supported. This implicitly means that `std::meta::info` definition must be extended, this will be discussed thereafter. 
 
 - `attribute [: r :]` produces a potentially empty sequence of attributes corresponding to the attributes that are attached to `r`
 
@@ -65,7 +68,7 @@ We propose to add a metafunction to what is discussed already in [@p2996r2]
   template<typename E>
     consteval auto attributes_of(E entity) -> vector<info>;
 ```
-This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`.
+This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`. In particular we think this addresses the case where `attribute-list` is of the form `[[ attribute... ]]`.
 
 ## Queries
 We do not think it is necessary to introduce query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_nodiscard`, `is_nouniqueaddress`, etc.)
@@ -73,8 +76,6 @@ We do not think it is necessary to introduce query or queries at this point. Esp
 # Discussion
 
 Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox. Note also that as we advocate here for `attribute [: r :]` to be supported, we recover the ease of use that we first envisioned `declattr` to have.
-
-Another item of discussion is whether vendor specific attributes should be supported or only the ones described by the standard, feedbacks on this is inexistent yet.
 
 ---
 references:
