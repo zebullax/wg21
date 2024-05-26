@@ -36,16 +36,12 @@ Other examples of wrapping around callables can be found, whether by closure or 
 The current example deals with code as it is in a c++23 world, but other applications can easily be thought of in the context of code injection [@P2237R0] where one may want to skip over `[[deprecated]]` members for example.
 
 # Optionality rule
-Currently the standard notes in ([dcl.attr.grammar]) that (broadly speaking) attributes are ignorable. Let us note
-
-- [@CWG2538] discusses changing this to restrict ignorability to `non standard`, and make program ill-formed when attribute semantic is violated
-- [@P2552R3] discusses at length how underspecified this wording is, especially on what 'ignorability' really mean
-This proposal agrees with the change proposed in [@CWG2538]. We also feel that whether an implementation decide to semantically ignore a standard  attribute should not matter.\
+There is a long standing and confusing discussion around how ignorable are attributes allowed to be. We'll refer the reader to [@P2552R3] for an at-length discussion of this problem, and especially on what 'ignorability' really mean. This proposal agrees with the discussion carried there and in [@CWG2538]. We also feel that whether an implementation decide to semantically ignore a standard attribute should not matter.\
 
 What matters more is self-consistency, when introspecting an entity:
 
-- We should be able to discover appertaining attributes (syntactically mandatory)
-- Declaring an entity with those discovered attributes yield the same result as what the implementation offer to natively (semantically optional)
+- We should be able to discover appertaining attributes
+- Declaring an entity with attributes discovered via introspection yield the same result as what the implementation would offer if directly declaring that entity with those attributes.
 
 # Proposal
 We put ourselves in the context of [@P2996R2] for the current proposal to be more illustrative in terms of what is being proposed.
