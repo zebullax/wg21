@@ -10,6 +10,9 @@ author:
 # Introduction
 The current draft aims at getting the conversation and work started on supporting introspection of attributes. There is ongoing work to refine that draft, especially when it comes to motivating examples.
 
+## Earlier work
+While collecting feedback on this draft, we were redirected to [@P1887R1] as a pre existing proposal. In this paper the author discusses two topics 'user defined attributes' (also in [@P2565R0]) and reflection over said attributes. We believe the two topics need not be conflated together, both have intrinsic values on their own. We aim here to focus the discussion entirely on **standard** attributes reflection.
+
 # Motivation
 
 Attributes are used to great extent and there likely will be attributes added as the language evolve.
@@ -81,50 +84,11 @@ This being applied to an entity `E` will yield a sequence of `std::meta::info` r
 ## Queries
 We do not think it is necessary to introduce query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_nodiscard`, `is_nouniqueaddress`, etc.)
 
+## Applications
+The applications here build on the adoption of earlier work, it is understood that they are not working examples *as of now*. The discussion is on the value-add of having those work.
+
+> *There Be well fleshed out applications*
+
 # Discussion
 
 Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox. Note also that as we advocate here for `attribute [: r :]` to be supported, we recover the ease of use that we first envisioned `declattr` to have.
-<!-- 
----
-references:
-  - id: p2996r2
-    citation-label: Reflection
-    title: "Reflection for c++26"
-    author:
-      - family: Childers
-        given: Wyatt
-      - family: Dimov
-        given: Peter
-      - family: Katz
-        given: Dan
-      - family: Revzin
-        given: Barry
-      - family: Sutton
-        given: Andrew
-      - family: Vali
-        given: Faisal
-      - family: Vandevoorde
-        given: Daveed
-    URL: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2996r2.html
-  - id: p2237r0
-    citation-label: Metaprogramming
-    title: "Metaprogramming"
-    author:
-      - family: Sutton
-        given: Andrew
-    URL: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2237r0.pdf
-    -id: p2552r3
-    citation-label: Optionality rule
-    title: "On the ignorability of standard attributes"
-    author:
-      - family: Doumler
-        given: Timur
-    URL: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2552r3.pdf
-    -id: CWG2358
-    citation-label: CWG2358
-    title: "Can standard attributes be syntactically ignored?"
-    author:
-      - family: Maurer
-        given: Jens
-    URL: https://cplusplus.github.io/CWG/issues/2538.html
---- -->
