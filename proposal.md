@@ -67,7 +67,7 @@ attribute [: r :]
 ```
 be supported. This implicitly means that `std::meta::info` definition must be extended, this will be discussed thereafter. 
 
-- `attribute [: r :]` produces a potentially empty sequence of attributes corresponding to the attributes that are attached to `r`
+- `attribute [: r :]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`
 
 ## std::meta::info
 We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means value of type `std::meta::info` should be able to represent an attribute in addition to the current supported set.
@@ -82,12 +82,32 @@ We propose to add a metafunction to what is discussed already in [@P2996R2]
 This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`. In particular we think this addresses the case where `attribute-list` is of the form `[[ attribute... ]]`.
 
 ## Queries
-We do not think it is necessary to introduce query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_nodiscard`, `is_nouniqueaddress`, etc.)
+We do not think it is necessary to introduce additional query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_deprecated`, `is_nouniqueaddress`, etc.).\
+Having said that, we feel those should be acheivable via concept for attributes inspected statically.
+```cpp
+template<class T>
+concept IsDeprecated = std::ranges::any_of(
+  attributes_of(^T),
+  [] (auto meta) { meta == ^[[deprecated]]; }
+);
+```
 
 ## Applications
 The applications here build on the adoption of earlier work, it is understood that they are not working examples *as of now*. The discussion is on the value-add of having those work.
 
 > *There Be well fleshed out applications*
+
+<!-- ### [[noreturn]]
+Spin a thread to run that never returning function.
+```cpp
+void launch(Callable auto callback) {
+  auto callbackAttributes = attributes_of(^callback);
+  if (std::ranges::any_of(callbackAttributes, [](auto attributeMeta) {attributeMeta == ^[[noreturn]]})) {
+    // Run on a dedicated thread and detache
+  } else {
+    callback();
+  }
+} -->
 
 # Discussion
 
