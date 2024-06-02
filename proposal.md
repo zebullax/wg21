@@ -51,7 +51,7 @@ We put ourselves in the context of [@P2996R2] for the current proposal to be mor
 
 ## Scope
 Attributes are split into standard and non standard. This proposal wishes to limit itself to standard attributes ([dcl.attr]). We feel that since it is up to implementation to define how they handle non standard attributes, it would lead to obscure situations that we don't claim to tackle here.\
-A fairly (admittedly ridiculous) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
+A fairly (admittedly artificial) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
 
 ## Reflection operator
 If our understanding is correct, the proposition for `^` grammar does not cover attributes , as in `^[[deprecated]]` is meaningless. We think this will limit the potential use of attributes introspection. The current proposal advocates for 
@@ -63,11 +63,11 @@ to be well formed.
 ## Splicers
 We propose that the form
 ```cpp
-attribute [: r :]
+[[ [: r :] ]]
 ```
 be supported. This implicitly means that `std::meta::info` definition must be extended, this will be discussed thereafter. 
 
-- `attribute [: r :]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`
+- `[[ [: r :] ]]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`. If the attributes produced through introspection violate the rules of what attributes can appertain to what entity, as usual the program is ill-formed.
 
 ## std::meta::info
 We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means value of type `std::meta::info` should be able to represent an attribute in addition to the current supported set.
@@ -82,8 +82,7 @@ We propose to add a metafunction to what is discussed already in [@P2996R2]
 This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`. In particular we think this addresses the case where `attribute-list` is of the form `[[ attribute... ]]`.
 
 ## Queries
-We do not think it is necessary to introduce additional query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_deprecated`, `is_nouniqueaddress`, etc.).\
-Having said that, we feel those should be acheivable via concept for attributes inspected statically.
+We do not think it is necessary to introduce additional query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_deprecated`, `is_nouniqueaddress`, etc.). Having said that, we feel those should be acheivable via concept, something akin to
 ```cpp
 template<class T>
 concept IsDeprecated = std::ranges::any_of(
@@ -93,21 +92,23 @@ concept IsDeprecated = std::ranges::any_of(
 ```
 
 ## Applications
-The applications here build on the adoption of earlier work, it is understood that they are not working examples *as of now*. The discussion is on the value-add of having those work.
+The applications here build on the adoption of earlier work, it is understood that they are not working examples *as of now*. We hope to keep the discussion focused on the value-add of having those work.
 
-> *There Be well fleshed out applications*
-
-<!-- ### [[noreturn]]
-Spin a thread to run that never returning function.
+### [[noreturn]]
+Launch thread to run `[[noreturn]]` function and detach, otherwise execute sequentially
 ```cpp
-void launch(Callable auto callback) {
-  auto callbackAttributes = attributes_of(^callback);
-  if (std::ranges::any_of(callbackAttributes, [](auto attributeMeta) {attributeMeta == ^[[noreturn]]})) {
-    // Run on a dedicated thread and detache
+void launch(auto task) {
+  constexpr bool isNoReturn = std::ranges::any_of(
+    attributes_of(^task),
+    [] (auto meta) { meta == ^[[noreturn]]; }
+  );
+  if constexpr (isNoReturn) {
+    std::thread z(task);
+    z.detach();
   } else {
-    callback();
+    task();
   }
-} -->
+}
 
 # Discussion
 
