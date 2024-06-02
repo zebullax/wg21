@@ -6,6 +6,7 @@ audience:
 author:
   - name: Aurelien Cassagnes
     email: <aurelien.cassagnes@gmail.com>
+toc-depth: 2
 ---
 # Introduction
 The current draft aims at getting the conversation and work started on supporting introspection of attributes. There is ongoing work to refine that draft, especially when it comes to motivating examples.
@@ -67,7 +68,9 @@ We propose that the form
 ```
 be supported. This implicitly means that `std::meta::info` definition must be extended, this will be discussed thereafter. 
 
-- `[[ [: r :] ]]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`. If the attributes produced through introspection violate the rules of what attributes can appertain to what entity, as usual the program is ill-formed.
+- `[[ [: r :] ]]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`.
+
+If the attributes produced through introspection violate the rules of what attributes can appertain to what entity, as usual the program is ill-formed.
 
 ## std::meta::info
 We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means value of type `std::meta::info` should be able to represent an attribute in addition to the current supported set.
