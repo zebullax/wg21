@@ -9,7 +9,8 @@ author:
 toc-depth: 2
 ---
 # Introduction
-The current draft aims at getting the conversation and work started on supporting introspection of attributes. There is ongoing work to refine that draft, especially when it comes to motivating examples.
+The current draft aims at getting the conversation and work started on supporting introspection of attributes.\
+There is ongoing work to refine that draft, especially when it comes to examples, applications and proposed wording.
 
 ## Earlier work
 While collecting feedback on this draft, we were redirected to [@P1887R1] as a pre existing proposal. In this paper the author discusses two topics 'user defined attributes' (also in [@P2565R0]) and reflection over said attributes. We believe the two topics need not be conflated together, both have intrinsic values on their own. We aim here to focus the discussion entirely on **standard** attributes reflection.
@@ -26,7 +27,7 @@ A motivating toy example is the following
 template <class F, class... Args>
 constexpr std::invoke_result_t<F, Args...> logInvoke(F&& f, Args&&... args) {
     // Do some extra work, log the call...
-    // Fwd call
+    // Forward call
     return std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
 }
 
@@ -48,41 +49,49 @@ What matters more is self-consistency, when introspecting an entity:
 - Declaring an entity with attributes discovered via introspection yield the same result as what the implementation would offer if directly declaring that entity with those attributes.
 
 # Proposal
-We put ourselves in the context of [@P2996R2] for the current proposal to be more illustrative in terms of what is being proposed.
+We put ourselves in the context of [@P2996R3] for the current proposal to be more illustrative in terms of what is being proposed.
 
 ## Scope
 Attributes are split into standard and non standard. This proposal wishes to limit itself to standard attributes ([dcl.attr]). We feel that since it is up to implementation to define how they handle non standard attributes, it would lead to obscure situations that we don't claim to tackle here.\
 A fairly (admittedly artificial) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
 
+## std::meta::info
+We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means value of type `std::meta::info` should be able to represent an attribute in addition to the currently supported set.
+
 ## Reflection operator
-If our understanding is correct, the proposition for `^` grammar does not cover attributes , as in `^[[deprecated]]` is meaningless. We think this will limit the potential use of attributes introspection. The current proposal advocates for 
+The current proposition for reflection operator grammar does not cover attributes, i.e. the expression`^[[deprecated]]` is ill-formed.\
+The current proposal advocates for supporting this new grammatical construct under _unary-expression_
+
+> | _unary-expression:_
+> |     ...
+> |     `^ [[`_attribute_`]]`
+
+As expected the resulting value is a reflection of the standard _attribute_. If the _attribute_ is not a standard attribute, the expression is ill-formed. The intent is to allow expressions of the form
+```cpp
+  if constexpr (^myVar == ^[[nodiscard]]) {
+    // Do something
+  }
 ```
-^ attribute
-```
-to be well formed.
 
 ## Splicers
 We propose that the form
 ```cpp
 [[ [: r :] ]]
 ```
-be supported. This implicitly means that `std::meta::info` definition must be extended, this will be discussed thereafter. 
+be supported in contexts where attributes are allowed.
 
 - `[[ [: r :] ]]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`.
 
 If the attributes produced through introspection violate the rules of what attributes can appertain to what entity, as usual the program is ill-formed.
 
-## std::meta::info
-We propose that attributes be a supported *reflectable* property of the expression that are reflected upon. That means value of type `std::meta::info` should be able to represent an attribute in addition to the current supported set.
-
 ## Metafunctions
-We propose to add a metafunction to what is discussed already in [@P2996R2]
+We propose to add a metafunction to what is discussed already in [@P2996R3]
 
 ```cpp
   template<typename E>
     consteval auto attributes_of(E entity) -> vector<info>;
 ```
-This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`. In particular we think this addresses the case where `attribute-list` is of the form `[[ attribute... ]]`.
+This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`.
 
 ## Queries
 We do not think it is necessary to introduce additional query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_deprecated`, `is_nouniqueaddress`, etc.). Having said that, we feel those should be acheivable via concept, something akin to
@@ -115,4 +124,4 @@ void launch(auto task) {
 ```
 # Discussion
 
-Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox. Note also that as we advocate here for `attribute [: r :]` to be supported, we recover the ease of use that we first envisioned `declattr` to have.
+Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox. Note also that as we advocate here for `[[ [: r :] ]` to be supported, we recover the ease of use that we first envisioned `declattr` to have.
