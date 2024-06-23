@@ -130,9 +130,11 @@ The applications here build on the adoption of earlier work, it is understood th
 Launch thread to run `[[noreturn]]` function and detach, otherwise execute sequentially
 ```cpp
 void launch(auto task) {
+  consteval auto noReturnAttributes = std::meta::attributes_of(^[[noreturn]]);
+
   constexpr bool isNoReturn = std::ranges::any_of(
     attributes_of(^task),
-    [] (auto meta) { meta == ^[[noreturn]]; }
+    [noReturnAttributes] (auto meta) { meta == noReturnAttributes; }
   );
   if constexpr (isNoReturn) {
     std::thread z(task);
