@@ -53,6 +53,7 @@ We put ourselves in the context of [@P2996R3] for the current proposal to be mor
 
 ## Scope
 Attributes are split into standard and non standard. This proposal wishes to limit itself to standard attributes ([dcl.attr]). We feel that since it is up to implementation to define how they handle non standard attributes, it would lead to obscure situations that we don't claim to tackle here.\
+
 A fairly (admittedly artificial) example can be built as such: Given an implementation supporting a non standard `[[no_introspect]]` attributes that suppress all reflection information appertaining to an entity, we would have a hard time coming up with a self-consistent system of rules to start with.
 
 ## std::meta::info
@@ -64,14 +65,8 @@ The current proposal advocates for supporting this new grammatical construct und
 
 > | _unary-expression:_
 > |     ...
-> |     `^ [[`_attribute_`]]`
-
-As expected the resulting value is a reflection of the standard _attribute_. If the _attribute_ is not a standard attribute, the expression is ill-formed. The intent is to allow expressions of the form
-```cpp
-  if constexpr (^myVar == ^[[nodiscard]]) {
-    // Do something
-  }
-```
+> |     `^ [[`_attribute-list_`]]`
+The resulting value is a reflection value embedding relevant info for the standard _attribute_ entity. If the _attribute_ is not a standard attribute, the expression is ill-formed.
 
 ## Splicers
 We propose that the form
@@ -80,26 +75,51 @@ We propose that the form
 ```
 be supported in contexts where attributes are allowed.
 
-- `[[ [: r :] ]]` produces a potentially empty sequence of attributes corresponding to the attributes that pertain to `r`.
+- `[[ [: r :] ]]` produces a potentially empty sequence of attributes corresponding to the attributes reflected via `r`.
 
-If the attributes produced through introspection violate the rules of what attributes can appertain to what entity, as usual the program is ill-formed.
+A toy example is as follows
+```cpp
+[[nodiscard]]
+enum class ErrorCode {
+  e_Warn,
+  e_Fatal,
+};
+
+[[ [: ^ErrorCode :] ]]
+enum class ClosedErrorCode {
+  template for (constexpr auto e : std::meta::enumerators_of(^ErrorCode)) {
+    return [:e:],
+  }
+  e_Final,
+};
+```
+
+If the attributes produced through introspection violate the rules of what attributes can appertain to what entity, as usual the program is ill-formed. 
 
 ## Metafunctions
-We propose to add a metafunction to what is discussed already in [@P2996R3]
+We propose to add two metafunctions to what is discussed already in [@P2996R3]
 
+### attributes_of
 ```cpp
-  template<typename E>
-    consteval auto attributes_of(E entity) -> vector<info>;
+consteval auto attributes_of(info entity) -> vector<info>;
 ```
-This being applied to an entity `E` will yield a sequence of `std::meta::info` representing the attributes attached to `E`.
+This being applied to a reflection `entity` will yield a sequence of `std::meta::info` representing the attributes appertaining to `entity`.
+
+### is_standard_attribute
+```cpp
+consteval auto is_standard_attribute(info entity) -> bool;
+```
+This would return true if r designates a standard `[[attribute-list]]`, otherwise it would return false.
 
 ## Queries
 We do not think it is necessary to introduce additional query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_deprecated`, `is_nouniqueaddress`, etc.). Having said that, we feel those should be acheivable via concept, something akin to
 ```cpp
+consteval auto deprecatedAttributes = std::meta::attributes_of(^[[deprecated]]);
+
 template<class T>
 concept IsDeprecated = std::ranges::any_of(
   attributes_of(^T),
-  [] (auto meta) { meta == ^[[deprecated]]; }
+  [deprecatedAttributes] (auto meta) { meta == deprecatedAttributes[0]; }
 );
 ```
 
