@@ -114,7 +114,7 @@ This would return true if r designates a standard `[[attribute-list]]`, otherwis
 ## Queries
 We do not think it is necessary to introduce additional query or queries at this point. Especially we would not recommend to introduce a dedicated query per attribute (eg `is_deprecated`, `is_nouniqueaddress`, etc.). Having said that, we feel those should be acheivable via concept, something akin to
 ```cpp
-consteval auto deprecatedAttributes = std::meta::attributes_of(^[[deprecated]]);
+auto deprecatedAttributes = std::meta::attributes_of(^[[deprecated]]);
 
 template<class T>
 concept IsDeprecated = std::ranges::any_of(
@@ -124,26 +124,9 @@ concept IsDeprecated = std::ranges::any_of(
 ```
 
 ## Applications
-The applications here build on the adoption of earlier work, it is understood that they are not working examples *as of now*. We hope to keep the discussion focused on the value-add of having those work.
 
-### [[noreturn]]
-Launch thread to run `[[noreturn]]` function and detach, otherwise execute sequentially
-```cpp
-void launch(auto task) {
-  consteval auto noReturnAttributes = std::meta::attributes_of(^[[noreturn]]);
+*coming next*
 
-  constexpr bool isNoReturn = std::ranges::any_of(
-    attributes_of(^task),
-    [noReturnAttributes] (auto meta) { meta == noReturnAttributes; }
-  );
-  if constexpr (isNoReturn) {
-    std::thread z(task);
-    z.detach();
-  } else {
-    task();
-  }
-}
-```
 # Discussion
 
 Originally the idea of introducing a `declattr(Expression)` keyword seemed the most straightforward to tackle on this problem, but from feedback the concern of introspecting on expression attributes was a concern that belongs with the reflection SG. The current proposal shifted away from the original `declattr` idea to align better with the reflection toolbox. Note also that as we advocate here for `[[ [: r :] ]` to be supported, we recover the ease of use that we first envisioned `declattr` to have.
